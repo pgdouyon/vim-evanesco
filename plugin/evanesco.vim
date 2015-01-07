@@ -25,6 +25,7 @@ let s:saved_cmappings = []
 function! s:evanesco(direction)
     let s:evanesco_active = 1
     let s:save_cursor = getpos(".")
+    let s:save_search = @/
     let s:save_cpo = &cpo
     let s:save_tvb = &t_vb
     let s:save_vb = &vb
@@ -56,9 +57,13 @@ function! s:evanesco_finish(key, direction)
         let s:evanesco_active = 0
         let is_cr = (a:key =~? '<CR>\|<C-J>')
         if is_cr
+            let s:evanesco_forward = a:direction
+            let s:evanesco_canceled = 0
             set hlsearch
         else
+            let s:evanesco_canceled = 1
             call setpos(".", s:save_cursor)
+            let @/ = s:save_search
         endif
     endif
 endfunction
@@ -82,17 +87,43 @@ function! s:restore_mappings()
     endfor
 endfunction
 
+
+" ===========================================================================
+" v:searchforward is reset to 1 whenever writing to the search register (@/).
+" Evanesco writes to the search register on canceled searches to preserve the
+" original search term, resulting in inconsistent movement directions for n/N
+" when used after a canceled search.
+"
+" This function calculates the correct direction that an `n` or `N` command
+" should move following a canceled search.
+" ===========================================================================
+function! s:evanesco_next(mode, next)
+    if !exists("s:evanesco_canceled")
+        return (a:next ? "n" : "N")
+    endif
+
+    let hlsearch = (a:mode ==? "n" ? ":set hlsearch\<CR>" : "")
+    if s:evanesco_canceled
+        let forward = (a:next && s:evanesco_forward) || (!a:next && !s:evanesco_forward)
+        let next = (forward ? "n" : "N")
+    else
+        let next = (a:next ? "n" : "N")
+    endif
+    return next . hlsearch
+endfunction
+
 nnoremap <Plug>Evanesco_/  :<C-U>call <SID>evanesco(1)<CR>/
 nnoremap <Plug>Evanesco_?  :<C-U>call <SID>evanesco(0)<CR>?
 nmap / <Plug>Evanesco_/
 nmap ? <Plug>Evanesco_?
 
-nnoremap <silent> <Plug>Evanesco_n  n:set hlsearch<CR>
-nnoremap <silent> <Plug>Evanesco_N  N:set hlsearch<CR>
 nnoremap <silent> <Plug>Evanesco_*  *N:set hlsearch<CR>
 nnoremap <silent> <Plug>Evanesco_#  #N:set hlsearch<CR>
 nnoremap <silent> <Plug>Evanesco_g* g*N:set hlsearch<CR>
 nnoremap <silent> <Plug>Evanesco_g# g#N:set hlsearch<CR>
+
+nnoremap <silent><expr> <Plug>Evanesco_n <SID>evanesco_next("n", 1)
+nnoremap <silent><expr> <Plug>Evanesco_N <SID>evanesco_next("n", 0)
 
 for key in ['/', '?', 'n', 'N', '*', '#', 'g*', 'g#']
     execute printf("nmap %s <Plug>Evanesco_%s", key, key)
