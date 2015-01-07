@@ -31,7 +31,7 @@ function! s:evanesco(direction)
     set t_vb=
     set vb
     set nohlsearch
-    for key in ['<CR>',  '<C-C>', '<Esc>']
+    for key in ['<CR>', '<C-J>', '<C-C>', '<Esc>']
         let name = tolower(substitute(key, '[<>-]', '', 'g'))
         let old_map = maparg(key, "c", 0, 1)
         let rhs = (has_key(old_map, "rhs") ? old_map.rhs : "")
@@ -62,7 +62,7 @@ endfunction
 
 
 function! s:delete_evanesco_mappings()
-    for key in ['<CR>',  '<C-C>', '<Esc>']
+    for key in ['<CR>', '<C-J>', '<C-C>', '<Esc>']
         execute "silent! cunmap " . key
     endfor
 endfunction
