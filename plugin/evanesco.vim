@@ -98,6 +98,8 @@ endfunction
 " should move following a canceled search.
 " ===========================================================================
 function! s:evanesco_next(mode, next)
+    " Echo clears 'search hit BOTTOM' message
+    echo
     if !exists("s:evanesco_canceled")
         return (a:next ? "n" : "N")
     endif
