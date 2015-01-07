@@ -126,10 +126,18 @@ nnoremap <silent> <Plug>Evanesco_g# g#N:set hlsearch<CR>
 
 nnoremap <silent><expr> <Plug>Evanesco_n <SID>evanesco_next("n", 1)
 nnoremap <silent><expr> <Plug>Evanesco_N <SID>evanesco_next("n", 0)
+xnoremap <silent><expr> <Plug>Evanesco_n <SID>evanesco_next("x", 1)
+xnoremap <silent><expr> <Plug>Evanesco_N <SID>evanesco_next("x", 0)
+onoremap <silent><expr> <Plug>Evanesco_n <SID>evanesco_next("o", 1)
+onoremap <silent><expr> <Plug>Evanesco_N <SID>evanesco_next("o", 0)
 
 for key in ['/', '?', 'n', 'N', '*', '#', 'g*', 'g#']
     execute printf("nmap %s <Plug>Evanesco_%s", key, key)
 endfor
+xmap n <Plug>Evanesco_n
+xmap N <Plug>Evanesco_N
+omap n <Plug>Evanesco_n
+omap N <Plug>Evanesco_N
 
 augroup evanesco
     autocmd!
