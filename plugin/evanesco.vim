@@ -24,6 +24,7 @@ let s:saved_cmappings = []
 
 function! s:evanesco(direction)
     let s:evanesco_active = 1
+    let s:save_cursor = getpos(".")
     let s:save_cpo = &cpo
     let s:save_tvb = &t_vb
     let s:save_vb = &vb
@@ -56,6 +57,8 @@ function! s:evanesco_finish(key, direction)
         let is_cr = (a:key =~? '<CR>\|<C-J>')
         if is_cr
             set hlsearch
+        else
+            call setpos(".", s:save_cursor)
         endif
     endif
 endfunction
