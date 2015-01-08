@@ -20,10 +20,10 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 let s:evanesco_active = 0
-let s:saved_cmappings = []
 
 function! s:evanesco(direction)
     let s:evanesco_active = 1
+    let s:saved_cmappings = []
     let s:save_cursor = getpos(".")
     let s:save_search = @/
     let s:save_cpo = &cpo
