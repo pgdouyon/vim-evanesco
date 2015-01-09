@@ -21,7 +21,7 @@ set cpoptions&vim
 
 let s:evanesco_active = 0
 
-function! s:evanesco(direction)
+function! s:evanesco(forward)
     let s:evanesco_active = 1
     let s:saved_cmappings = []
     let s:save_cursor = getpos(".")
@@ -39,7 +39,7 @@ function! s:evanesco(direction)
         let rhs = (has_key(old_map, "rhs") ? old_map.rhs : "")
         execute "silent! cunmap " . key
         execute printf('cnoremap <silent> %s %s<Esc><Esc>:<C-U>call <SID>evanesco_finish("\%s", "%d")<CR>',
-            \ key, rhs, key, a:direction)
+            \ key, rhs, key, a:forward)
         if !empty(old_map)
             call add(s:saved_cmappings, old_map)
         endif
@@ -47,7 +47,7 @@ function! s:evanesco(direction)
 endfunction
 
 
-function! s:evanesco_finish(key, direction)
+function! s:evanesco_finish(key, forward)
     if s:evanesco_active
         let &cpo = s:save_cpo
         let &t_vb = s:save_tvb
@@ -57,7 +57,7 @@ function! s:evanesco_finish(key, direction)
         let s:evanesco_active = 0
         let is_cr = (a:key =~? '<CR>\|<C-J>')
         if is_cr
-            let s:evanesco_forward = a:direction
+            let s:evanesco_forward = a:forward
             let s:evanesco_canceled = 0
             set hlsearch
         else
@@ -97,19 +97,19 @@ endfunction
 " This function calculates the correct direction that an `n` or `N` command
 " should move following a canceled search.
 " ===========================================================================
-function! s:evanesco_next(mode, next)
+function! s:evanesco_next(mode, forward)
     " Echo clears 'search hit BOTTOM' message
     echo
     if !exists("s:evanesco_canceled")
-        return (a:next ? "n" : "N")
+        return (a:forward ? "n" : "N")
     endif
 
     let hlsearch = (a:mode ==? "n" ? ":set hlsearch\<CR>" : "")
     if s:evanesco_canceled
-        let forward = (a:next && s:evanesco_forward) || (!a:next && !s:evanesco_forward)
+        let forward = (a:forward && s:evanesco_forward) || (!a:forward && !s:evanesco_forward)
         let next = (forward ? "n" : "N")
     else
-        let next = (a:next ? "n" : "N")
+        let next = (a:forward ? "n" : "N")
     endif
     return next . hlsearch
 endfunction
