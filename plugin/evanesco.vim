@@ -19,10 +19,7 @@ let g:loaded_evanesco = 1
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-let s:evanesco_active = 0
-
 function! s:evanesco(forward)
-    let s:evanesco_active = 1
     let s:saved_cmappings = []
     let s:save_cursor = getpos(".")
     let s:save_search = @/
@@ -48,26 +45,23 @@ endfunction
 
 
 function! s:evanesco_finish(key, forward)
-    if s:evanesco_active
-        let &cpo = s:save_cpo
-        let &t_vb = s:save_tvb
-        let &vb = s:save_vb
-        call s:delete_evanesco_mappings()
-        call s:restore_mappings()
-        let s:evanesco_active = 0
-        let is_cr = (a:key =~? '<CR>\|<C-J>')
-        if is_cr
-            let search_query = histget("search", -1)
-            let pattern_found = search(search_query, 'cnw')
-            if pattern_found
-                let s:evanesco_forward = a:forward
-                let @/ = search_query
-                call feedkeys("\<Plug>Evanesco_n", "m")
-            else
-                echohl Error
-                echomsg "E486: Pattern not found: " . search_query
-                echohl None
-            endif
+    let &cpo = s:save_cpo
+    let &t_vb = s:save_tvb
+    let &vb = s:save_vb
+    call s:delete_evanesco_mappings()
+    call s:restore_mappings()
+    let is_cr = (a:key =~? '<CR>\|<C-J>')
+    if is_cr
+        let search_query = histget("search", -1)
+        let pattern_found = search(search_query, 'cnw')
+        if pattern_found
+            let s:evanesco_forward = a:forward
+            let @/ = search_query
+            call feedkeys("\<Plug>Evanesco_n", "m")
+        else
+            echohl Error
+            echomsg "E486: Pattern not found: " . search_query
+            echohl None
         endif
     endif
 endfunction
