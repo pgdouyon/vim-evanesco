@@ -38,7 +38,7 @@ function! s:evanesco(forward)
         let old_map = maparg(key, "c", 0, 1)
         let rhs = (has_key(old_map, "rhs") ? old_map.rhs : "")
         execute "silent! cunmap " . key
-        execute printf('cnoremap <silent> %s %s<Esc><Esc>:<C-U>call <SID>evanesco_finish("\%s", "%d")<CR>',
+        execute printf('cnoremap <silent> %s %s<C-C><C-C>:echo<CR>:<C-U>call <SID>evanesco_finish("\%s", "%d")<CR>',
             \ key, rhs, key, a:forward)
         if !empty(old_map)
             call add(s:saved_cmappings, old_map)
@@ -57,13 +57,17 @@ function! s:evanesco_finish(key, forward)
         let s:evanesco_active = 0
         let is_cr = (a:key =~? '<CR>\|<C-J>')
         if is_cr
-            let s:evanesco_forward = a:forward
-            let s:evanesco_canceled = 0
-            set hlsearch
-        else
-            let s:evanesco_canceled = 1
-            call setpos(".", s:save_cursor)
-            let @/ = s:save_search
+            let search_query = histget("search", -1)
+            let pattern_found = search(search_query, 'cnw')
+            if pattern_found
+                let s:evanesco_forward = a:forward
+                let @/ = search_query
+                call feedkeys("\<Plug>Evanesco_n", "m")
+            else
+                echohl Error
+                echomsg "E486: Pattern not found: " . search_query
+                echohl None
+            endif
         endif
     endif
 endfunction
@@ -100,17 +104,12 @@ endfunction
 function! s:evanesco_next(mode, forward)
     " Echo clears 'search hit BOTTOM' message
     echo
-    if !exists("s:evanesco_canceled")
+    if !exists("s:evanesco_forward")
         return (a:forward ? "n" : "N")
     endif
 
     let hlsearch = (a:mode ==? "n" ? ":set hlsearch\<CR>" : "")
-    if s:evanesco_canceled
-        let forward = (a:forward && s:evanesco_forward) || (!a:forward && !s:evanesco_forward)
-        let next = (forward ? "n" : "N")
-    else
-        let next = (a:forward ? "n" : "N")
-    endif
+    let next = (s:evanesco_forward ==# a:forward ? "n" : "N")
     return next . hlsearch
 endfunction
 
