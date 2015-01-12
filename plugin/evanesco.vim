@@ -3,7 +3,7 @@
 "Description: Automatically clears search highlight on CursorMoved
 "Maintainer:  Pierre-Guy Douyon <pgdouyon@alum.mit.edu>
 "Version:     1.0.0
-"Last Change: 2015-01-06
+"Last Change: 2015-01-11
 "License:     MIT <../LICENSE>
 "==============================================================================
 
@@ -19,122 +19,53 @@ let g:loaded_evanesco = 1
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-function! s:evanesco(forward)
-    let s:saved_cmappings = []
-    let s:save_cursor = getpos(".")
-    let s:save_search = @/
-    let s:save_cpo = &cpo
-    let s:save_tvb = &t_vb
-    let s:save_vb = &vb
-    set cpoptions-=B
-    set t_vb=
-    set vb
-    set nohlsearch
-    for key in ['<CR>', '<C-J>', '<C-C>', '<Esc>']
-        let name = tolower(substitute(key, '[<>-]', '', 'g'))
-        let old_map = maparg(key, "c", 0, 1)
-        let rhs = (has_key(old_map, "rhs") ? old_map.rhs : "")
-        execute "silent! cunmap " . key
-        execute printf('cnoremap <silent> %s %s<C-C><C-C>:echo<CR>:<C-U>call <SID>evanesco_finish("\%s", "%d")<CR>',
-            \ key, rhs, key, a:forward)
-        if !empty(old_map)
-            call add(s:saved_cmappings, old_map)
-        endif
-    endfor
+let s:evanesco = 0
+
+function! s:evanesco()
+    let s:evanesco = 1
 endfunction
 
 
-function! s:evanesco_finish(key, forward)
-    let &cpo = s:save_cpo
-    let &t_vb = s:save_tvb
-    let &vb = s:save_vb
-    call s:delete_evanesco_mappings()
-    call s:restore_mappings()
-    let is_cr = (a:key =~? '<CR>\|<C-J>')
-    if is_cr
-        let search_query = histget("search", -1)
-        let pattern_found = search(search_query, 'cnw')
-        if pattern_found
-            let s:evanesco_forward = a:forward
-            let @/ = search_query
-            call feedkeys("\<Plug>Evanesco_n", "m")
-        else
-            echohl Error
-            echomsg "E486: Pattern not found: " . search_query
-            echohl None
-        endif
+function! s:evanesco_star()
+    let s:save_shortmess = &shortmess
+    set shortmess+=s
+endfunction
+
+
+function! s:evanesco_star_end()
+    set hlsearch
+    let &shortmess = s:save_shortmess
+endfunction
+
+
+function! s:evanesco_toggle_hl()
+    if s:evanesco
+        let s:evanesco = 0
+        set hlsearch
+    else
+        set nohlsearch
     endif
 endfunction
 
 
-function! s:delete_evanesco_mappings()
-    for key in ['<CR>', '<C-J>', '<C-C>', '<Esc>']
-        execute "silent! cunmap " . key
-    endfor
-endfunction
+nnoremap <Plug>Evanesco_/  :<C-U>call <SID>evanesco()<CR>/
+nnoremap <Plug>Evanesco_?  :<C-U>call <SID>evanesco()<CR>?
 
+nnoremap <silent> <Plug>Evanesco_n  :echo<CR>n:set hlsearch<CR>
+nnoremap <silent> <Plug>Evanesco_N  :echo<CR>N:set hlsearch<CR>
 
-function! s:restore_mappings()
-    for mapping in s:saved_cmappings
-        let map_cmd = (mapping.noremap ? "cnoremap" : "cmap")
-        let silent = (mapping.silent ? "<silent>" : "")
-        let buffer = (mapping.buffer ? "<buffer>" : "")
-        let nowait = (mapping.nowait ? "<nowait>" : "")
-        let expr = (mapping.expr ? "<expr>" : "")
-        execute map_cmd silent buffer nowait expr mapping.lhs mapping.rhs
-    endfor
-endfunction
-
-
-" ===========================================================================
-" v:searchforward is reset to 1 whenever writing to the search register (@/).
-" Evanesco writes to the search register on canceled searches to preserve the
-" original search term, resulting in inconsistent movement directions for n/N
-" when used after a canceled search.
-"
-" This function calculates the correct direction that an `n` or `N` command
-" should move following a canceled search.
-" ===========================================================================
-function! s:evanesco_next(mode, forward)
-    " Echo clears 'search hit BOTTOM' message
-    echo
-    if !exists("s:evanesco_forward")
-        return (a:forward ? "n" : "N")
-    endif
-
-    let hlsearch = (a:mode ==? "n" ? ":set hlsearch\<CR>" : "")
-    let next = (s:evanesco_forward ==# a:forward ? "n" : "N")
-    return next . hlsearch
-endfunction
-
-nnoremap <Plug>Evanesco_/  :<C-U>call <SID>evanesco(1)<CR>/
-nnoremap <Plug>Evanesco_?  :<C-U>call <SID>evanesco(0)<CR>?
-nmap / <Plug>Evanesco_/
-nmap ? <Plug>Evanesco_?
-
-nnoremap <silent> <Plug>Evanesco_*  *N:set hlsearch<CR>
-nnoremap <silent> <Plug>Evanesco_#  #N:set hlsearch<CR>
-nnoremap <silent> <Plug>Evanesco_g* g*N:set hlsearch<CR>
-nnoremap <silent> <Plug>Evanesco_g# g#N:set hlsearch<CR>
-
-nnoremap <silent><expr> <Plug>Evanesco_n <SID>evanesco_next("n", 1)
-nnoremap <silent><expr> <Plug>Evanesco_N <SID>evanesco_next("n", 0)
-xnoremap <silent><expr> <Plug>Evanesco_n <SID>evanesco_next("x", 1)
-xnoremap <silent><expr> <Plug>Evanesco_N <SID>evanesco_next("x", 0)
-onoremap <silent><expr> <Plug>Evanesco_n <SID>evanesco_next("o", 1)
-onoremap <silent><expr> <Plug>Evanesco_N <SID>evanesco_next("o", 0)
+nnoremap <silent> <Plug>Evanesco_*  :call <SID>evanesco_star()<CR>*N:call <SID>evanesco_star_end()<CR>
+nnoremap <silent> <Plug>Evanesco_#  :call <SID>evanesco_star()<CR>#N:call <SID>evanesco_star_end()<CR>
+nnoremap <silent> <Plug>Evanesco_g* :call <SID>evanesco_star()<CR>g*N:call <SID>evanesco_star_end()<CR>
+nnoremap <silent> <Plug>Evanesco_g# :call <SID>evanesco_star()<CR>g#N:call <SID>evanesco_star_end()<CR>
 
 for key in ['/', '?', 'n', 'N', '*', '#', 'g*', 'g#']
     execute printf("nmap %s <Plug>Evanesco_%s", key, key)
 endfor
-xmap n <Plug>Evanesco_n
-xmap N <Plug>Evanesco_N
-omap n <Plug>Evanesco_n
-omap N <Plug>Evanesco_N
 
 augroup evanesco
     autocmd!
-    autocmd CursorMoved,InsertEnter * set nohlsearch
+    autocmd CursorMoved,InsertEnter * call <SID>evanesco_toggle_hl()
 augroup END
 
 let &cpoptions = s:save_cpo
