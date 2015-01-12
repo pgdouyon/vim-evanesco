@@ -22,17 +22,6 @@ Installation
     * Copy all the files into the appropriate directory under `~/.vim` on \*nix or
       `$HOME/_vimfiles` on Windows
 
-Known Bugs
-----------
-
-- Evanesco doesn't play well with the expression prompt (`:h c_ctrl-r_=`), any
-  expression entered there is automatically appeneded to the search term and
-  it's impossible edit the search query after leaving the expression prompt.
-    - There are no plans to address this in the near future.
-- Evanesco doesn't currently recognize mappings to <Esc>, though this should be
-  fixed soon.
-
-
 License
 -------
 
