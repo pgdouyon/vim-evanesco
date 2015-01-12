@@ -15,9 +15,9 @@ Installation
 ------------
 
 * [Pathogen][]
-    * `cd ~/.vim/bundle && git clone https://github.com/pgdouyon/vim-niffler.git`
+    * `cd ~/.vim/bundle && git clone https://github.com/pgdouyon/vim-evanesco.git`
 * [Vim-Plug][]
-    * `Plug 'pgdouyon/vim-niffler'`
+    * `Plug 'pgdouyon/vim-evanesco'`
 * Manual Install
     * Copy all the files into the appropriate directory under `~/.vim` on \*nix or
       `$HOME/_vimfiles` on Windows
