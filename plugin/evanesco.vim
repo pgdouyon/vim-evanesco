@@ -23,6 +23,8 @@ let s:evanesco = 0
 
 function! s:evanesco()
     let s:evanesco = 1
+    autocmd! evanesco
+    autocmd evanesco CursorMoved,InsertEnter * call <SID>evanesco_toggle_hl()
 endfunction
 
 
@@ -33,7 +35,8 @@ endfunction
 
 
 function! s:evanesco_star_end()
-    set hlsearch
+    call s:evanesco()
+    call s:evanesco_toggle_hl()
     let &shortmess = s:save_shortmess
 endfunction
 
@@ -49,6 +52,7 @@ function! s:evanesco_toggle_hl()
         endif
     else
         set nohlsearch
+        autocmd! evanesco
     endif
 endfunction
 
@@ -56,8 +60,8 @@ endfunction
 nnoremap <Plug>Evanesco_/  :<C-U>call <SID>evanesco()<CR>/
 nnoremap <Plug>Evanesco_?  :<C-U>call <SID>evanesco()<CR>?
 
-nnoremap <silent> <Plug>Evanesco_n  :echo<CR>n:set hlsearch<CR>
-nnoremap <silent> <Plug>Evanesco_N  :echo<CR>N:set hlsearch<CR>
+nnoremap <silent> <Plug>Evanesco_n  :echo<CR>:call <SID>evanesco()<CR>n
+nnoremap <silent> <Plug>Evanesco_N  :echo<CR>:call <SID>evanesco()<CR>N
 
 nnoremap <silent> <Plug>Evanesco_*  :call <SID>evanesco_star()<CR>*N:call <SID>evanesco_star_end()<CR>
 nnoremap <silent> <Plug>Evanesco_#  :call <SID>evanesco_star()<CR>#N:call <SID>evanesco_star_end()<CR>
@@ -67,11 +71,6 @@ nnoremap <silent> <Plug>Evanesco_g# :call <SID>evanesco_star()<CR>g#N:call <SID>
 for key in ['/', '?', 'n', 'N', '*', '#', 'g*', 'g#']
     execute printf("nmap %s <Plug>Evanesco_%s", key, key)
 endfor
-
-augroup evanesco
-    autocmd!
-    autocmd CursorMoved,InsertEnter * call <SID>evanesco_toggle_hl()
-augroup END
 
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
