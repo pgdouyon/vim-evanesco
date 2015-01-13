@@ -47,7 +47,7 @@ function! s:evanesco_toggle_hl()
     if s:evanesco
         let s:evanesco = 0
         let last_search = escape(@/, '\')
-        let this_search = histget("search", -1)
+        let this_search = s:get_this_search()
         let search_dir = (v:searchforward ? "/" : "?")
         let offset = '\m\%('.search_dir.'[esb]\?[+-]\?[0-9]*\)\?$'
         let conjunctive_offset = '\m\%([/?][esb]\?[+-]\?[0-9]*\)\?$'
@@ -60,6 +60,17 @@ function! s:evanesco_toggle_hl()
         set nohlsearch
         autocmd! evanesco
     endif
+endfunction
+
+
+function! s:get_this_search()
+    let this_search = histget("search", -1)
+    let search_dir = (v:searchforward ? "/" : "?")
+    let used_last_pattern = (this_search =~# '^'.search_dir)
+    if used_last_pattern
+        let this_search = @/ . this_search
+    endif
+    return this_search
 endfunction
 
 
