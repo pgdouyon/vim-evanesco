@@ -46,11 +46,14 @@ endfunction
 function! s:evanesco_toggle_hl()
     if s:evanesco
         let s:evanesco = 0
+        let last_search = escape(@/, '\')
+        let this_search = histget("search", -1)
         let search_dir = (v:searchforward ? "/" : "?")
-        let offset = '\%('.search_dir.'[esb]\?[+-]\?[0-9]*\)\?$'
-        let conjunctive_offset = '\%([/?][esb]\?[+-]\?[0-9]*\)\?$'
-        let last_search = histget("search", -1)
-        if last_search =~# '^'.@/.offset || last_search =~# '[/?]'.@/.conjunctive_offset
+        let offset = '\m\%('.search_dir.'[esb]\?[+-]\?[0-9]*\)\?$'
+        let conjunctive_offset = '\m\%([/?][esb]\?[+-]\?[0-9]*\)\?$'
+        let normal_search_executed = (this_search =~# '^\V'.last_search.offset)
+        let conjunctive_search_executed = (this_search =~# '[/?]\V'.last_search.conjunctive_offset)
+        if normal_search_executed || conjunctive_search_executed
             set hlsearch
         endif
     else
