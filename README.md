@@ -11,6 +11,16 @@ The only reason to use this plugin over vim-oblique is that it's arguably less
 of a hack, doesn't have any plugin dependencies, and the code is significantly
 smaller.
 
+
+Features
+--------
+
+- Automatically clears search highlight when the cursor is moved
+- Draw attention to search under cursor with different highlight group
+- Star-search highlights without moving (doesn't yet have an option to easily
+  disable this feature)
+
+
 Installation
 ------------
 

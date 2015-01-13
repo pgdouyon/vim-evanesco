@@ -55,11 +55,33 @@ function! s:evanesco_toggle_hl()
         let conjunctive_search_executed = (this_search =~# '[/?]\V'.last_search.conjunctive_offset)
         if normal_search_executed || conjunctive_search_executed
             set hlsearch
+            call s:clear_current_match()
+            call s:highlight_current_match()
         endif
     else
         set nohlsearch
+        call s:clear_current_match()
         autocmd! evanesco
     endif
+endfunction
+
+
+function! s:highlight_current_match()
+    let prefix = '\c\%'.line('.').'l\%'.col('.').'c'
+    let s:current_match = matchadd("IncSearch", prefix.@/)
+    let s:current_match_window = winnr()
+    let s:current_match_tab = tabpagenr()
+endfunction
+
+
+function! s:clear_current_match()
+    let save_tab = tabpagenr()
+    let save_win = tabpagewinnr(s:current_match_tab)
+    execute "tabnext " . s:current_match_tab
+    execute s:current_match_window . "wincmd w"
+    silent! call matchdelete(s:current_match)
+    execute save_win . "wincmd w"
+    execute "tabnext " . save_tab
 endfunction
 
 
