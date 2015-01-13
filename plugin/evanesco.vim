@@ -75,13 +75,13 @@ endfunction
 
 
 function! s:clear_current_match()
-    let save_tab = tabpagenr()
-    let save_win = tabpagewinnr(s:current_match_tab)
-    execute "tabnext " . s:current_match_tab
-    execute s:current_match_window . "wincmd w"
+    silent! let save_tab = tabpagenr()
+    silent! let save_win = tabpagewinnr(s:current_match_tab)
+    silent! execute "tabnext " . s:current_match_tab
+    silent! execute s:current_match_window . "wincmd w"
     silent! call matchdelete(s:current_match)
-    execute save_win . "wincmd w"
-    execute "tabnext " . save_tab
+    silent! execute save_win . "wincmd w"
+    silent! execute "tabnext " . save_tab
 endfunction
 
 
