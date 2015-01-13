@@ -41,7 +41,12 @@ endfunction
 function! s:evanesco_toggle_hl()
     if s:evanesco
         let s:evanesco = 0
-        set hlsearch
+        let search_dir = (v:searchforward ? "/" : "?")
+        let search_pattern = printf('\%%([^%s]\|\\\@<=%s\)\+', search_dir, search_dir)
+        let last_search = matchstr(histget("search", -1), search_pattern)
+        if @/ ==# last_search
+            set hlsearch
+        endif
     else
         set nohlsearch
     endif
