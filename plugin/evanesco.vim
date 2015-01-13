@@ -23,8 +23,10 @@ let s:evanesco = 0
 
 function! s:evanesco()
     let s:evanesco = 1
-    autocmd! evanesco
-    autocmd evanesco CursorMoved,InsertEnter * call <SID>evanesco_toggle_hl()
+    augroup evanesco
+        autocmd!
+        autocmd CursorMoved,InsertEnter * call <SID>evanesco_toggle_hl()
+    augroup END
 endfunction
 
 
