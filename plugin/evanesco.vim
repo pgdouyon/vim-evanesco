@@ -32,6 +32,7 @@ endfunction
 
 function! s:evanesco_star()
     let s:save_shortmess = &shortmess
+    let s:save_winview = winsaveview()
     set shortmess+=s
 endfunction
 
@@ -39,6 +40,7 @@ endfunction
 function! s:evanesco_star_end()
     call s:evanesco()
     call s:evanesco_toggle_hl()
+    call winrestview(s:save_winview)
     let &shortmess = s:save_shortmess
 endfunction
 
