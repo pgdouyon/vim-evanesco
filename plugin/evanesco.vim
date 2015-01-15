@@ -38,10 +38,13 @@ endfunction
 
 
 function! s:evanesco_star_end()
+    let &shortmess = s:save_shortmess
+    let s:save_winview.lnum = line(".")
+    let s:save_winview.col = col(".") - 1
+    let s:save_winview.coladd = 0
     call s:evanesco()
     call s:evanesco_toggle_hl()
     call winrestview(s:save_winview)
-    let &shortmess = s:save_shortmess
 endfunction
 
 
@@ -70,7 +73,7 @@ endfunction
 
 function! s:highlight_current_match()
     let prefix = '\c\%'.line('.').'l\%'.col('.').'c'
-    let s:current_match = matchadd("IncSearch", prefix.@/)
+    let s:current_match = matchadd("IncSearch", prefix.@/, 999)
     let s:current_match_window = winnr()
     let s:current_match_tab = tabpagenr()
 endfunction
