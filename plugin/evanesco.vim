@@ -32,6 +32,12 @@ function! s:evanesco()
 endfunction
 
 
+function! s:evanesco_next_end()
+    call s:evanesco()
+    call s:evanesco_toggle_hl()
+endfunction
+
+
 function! s:evanesco_star()
     let s:save_shortmess = &shortmess
     let s:save_winview = winsaveview()
@@ -106,8 +112,8 @@ endfunction
 nnoremap <Plug>Evanesco_/  :<C-U>call <SID>evanesco()<CR>/
 nnoremap <Plug>Evanesco_?  :<C-U>call <SID>evanesco()<CR>?
 
-nnoremap <silent> <Plug>Evanesco_n  :echo<CR>:call <SID>evanesco()<CR>n
-nnoremap <silent> <Plug>Evanesco_N  :echo<CR>:call <SID>evanesco()<CR>N
+nnoremap <silent> <Plug>Evanesco_n  :echo<CR>n:call <SID>evanesco_next_end()<CR>
+nnoremap <silent> <Plug>Evanesco_N  :echo<CR>N:call <SID>evanesco_next_end()<CR>
 
 nnoremap <silent> <Plug>Evanesco_*  :call <SID>evanesco_star()<CR>*N:call <SID>evanesco_star_end()<CR>
 nnoremap <silent> <Plug>Evanesco_#  :call <SID>evanesco_star()<CR>#N:call <SID>evanesco_star_end()<CR>
