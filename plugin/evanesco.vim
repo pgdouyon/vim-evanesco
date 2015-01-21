@@ -3,7 +3,7 @@
 "Description: Automatically clears search highlight on CursorMoved
 "Maintainer:  Pierre-Guy Douyon <pgdouyon@alum.mit.edu>
 "Version:     1.0.0
-"Last Change: 2015-01-11
+"Last Change: 2015-01-21
 "License:     MIT <../LICENSE>
 "==============================================================================
 
@@ -23,6 +23,8 @@ let s:evanesco = 0
 
 function! s:evanesco()
     let s:evanesco = 1
+    set nohlsearch
+    call s:clear_current_match()
     augroup evanesco
         autocmd!
         autocmd CursorMoved,InsertEnter * call <SID>evanesco_toggle_hl()
