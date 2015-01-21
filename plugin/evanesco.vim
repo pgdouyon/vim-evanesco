@@ -65,7 +65,7 @@ function! s:evanesco_toggle_hl()
         let offset = '\m\%('.search_dir.'[esb]\?[+-]\?[0-9]*\)\?$'
         let conjunctive_offset = '\m\%([/?][esb]\?[+-]\?[0-9]*\)\?$'
         let normal_search_executed = (this_search =~# '^\V'.last_search.offset)
-        let conjunctive_search_executed = (this_search =~# '[/?]\V'.last_search.conjunctive_offset)
+        let conjunctive_search_executed = (this_search =~# ';[/?]\V'.last_search.conjunctive_offset)
         if normal_search_executed || conjunctive_search_executed
             set hlsearch
             call s:clear_current_match()
