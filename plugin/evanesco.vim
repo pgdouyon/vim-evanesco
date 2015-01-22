@@ -88,13 +88,18 @@ endfunction
 
 
 function! s:clear_current_match()
-    silent! let save_tab = tabpagenr()
-    silent! let save_win = tabpagewinnr(s:current_match_tab)
-    silent! execute "tabnext " . s:current_match_tab
-    silent! execute s:current_match_window . "wincmd w"
-    silent! call matchdelete(s:current_match)
-    silent! execute save_win . "wincmd w"
-    silent! execute "tabnext " . save_tab
+    if exists("s:current_match")
+        let save_tab = tabpagenr()
+        let save_win = tabpagewinnr(s:current_match_tab)
+        execute "tabnext " . s:current_match_tab
+        execute s:current_match_window . "wincmd w"
+        call matchdelete(s:current_match)
+        execute save_win . "wincmd w"
+        execute "tabnext " . save_tab
+    endif
+    silent! unlet s:current_match
+    silent! unlet s:current_match_window
+    silent! unlet s:current_match_tab
 endfunction
 
 
