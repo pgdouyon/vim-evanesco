@@ -3,7 +3,7 @@
 "Description: Automatically clears search highlight on CursorMoved
 "Maintainer:  Pierre-Guy Douyon <pgdouyon@alum.mit.edu>
 "Version:     1.0.0
-"Last Change: 2015-01-21
+"Last Change: 2015-01-23
 "License:     MIT <../LICENSE>
 "==============================================================================
 
@@ -42,6 +42,18 @@ function! s:evanesco_star()
     let s:save_shortmess = &shortmess
     let s:save_winview = winsaveview()
     set shortmess+=s
+endfunction
+
+
+function! s:evanesco_visual_star()
+    let save_unnamed = @@
+    let s:save_shortmess = &shortmess
+    let s:save_winview = winsaveview()
+    set shortmess+=s
+    normal! gvy
+    let search_term = @@
+    let @@ = save_unnamed
+    return search_term
 endfunction
 
 
@@ -125,9 +137,14 @@ nnoremap <silent> <Plug>Evanesco_#  :call <SID>evanesco_star()<CR>#N:call <SID>e
 nnoremap <silent> <Plug>Evanesco_g* :call <SID>evanesco_star()<CR>g*N:call <SID>evanesco_star_end()<CR>
 nnoremap <silent> <Plug>Evanesco_g# :call <SID>evanesco_star()<CR>g#N:call <SID>evanesco_star_end()<CR>
 
+xnoremap <silent> <Plug>Evanesco_*  <Esc>/<C-R>=<SID>evanesco_visual_star()<CR><CR>N:call <SID>evanesco_star_end()<CR>
+xnoremap <silent> <Plug>Evanesco_#  <Esc>?<C-R>=<SID>evanesco_visual_star()<CR><CR>N:call <SID>evanesco_star_end()<CR>
+
 for key in ['/', '?', 'n', 'N', '*', '#', 'g*', 'g#']
     execute printf("nmap %s <Plug>Evanesco_%s", key, key)
 endfor
+xmap * <Plug>Evanesco_*
+xmap # <Plug>Evanesco_#
 
 let &cpoptions = s:save_cpo
 unlet s:save_cpo

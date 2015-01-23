@@ -19,6 +19,7 @@ Features
 - Draw attention to search under cursor with different highlight group
 - Star-search highlights without moving (doesn't yet have an option to easily
   disable this feature)
+- Visual star-search
 
 
 Installation
