@@ -146,5 +146,11 @@ endfor
 xmap * <Plug>Evanesco_*
 xmap # <Plug>Evanesco_#
 
+augroup evanesco_cmdwin
+    autocmd!
+    autocmd CmdWinEnter [/?] let s:evanesco = 0
+    autocmd CmdWinLeave [/?] call <SID>evanesco()
+augroup END
+
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
