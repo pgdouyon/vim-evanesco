@@ -25,7 +25,7 @@ function! s:evanesco()
     let s:evanesco = 1
     set nohlsearch
     call s:clear_current_match()
-    augroup evanesco
+    augroup evanesco_hl
         autocmd!
         autocmd CursorMoved,InsertEnter * call <SID>evanesco_toggle_hl()
     augroup END
@@ -86,7 +86,8 @@ function! s:evanesco_toggle_hl()
     else
         set nohlsearch
         call s:clear_current_match()
-        autocmd! evanesco
+        autocmd! evanesco_hl
+        augroup! evanesco_hl
     endif
 endfunction
 
@@ -148,7 +149,7 @@ endfor
 xmap * <Plug>Evanesco_*
 xmap # <Plug>Evanesco_#
 
-augroup evanesco_cmdwin
+augroup evanesco
     autocmd!
     autocmd CmdWinEnter [/?] let s:evanesco = 0
     autocmd CmdWinLeave [/?] call <SID>evanesco()
