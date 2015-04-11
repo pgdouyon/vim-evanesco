@@ -93,23 +93,25 @@ endfunction
 
 function! s:highlight_current_match()
     let prefix = '\c\%'.line('.').'l\%'.col('.').'c'
-    let s:current_match = matchadd("IncSearch", prefix.@/, 999)
+    let w:evanesco_current_match = matchadd("IncSearch", prefix.@/, 999)
     let s:current_match_window = winnr()
     let s:current_match_tab = tabpagenr()
 endfunction
 
 
 function! s:clear_current_match()
-    if exists("s:current_match")
+    if exists("s:current_match_window")
         let save_tab = tabpagenr()
         let save_win = tabpagewinnr(s:current_match_tab)
         execute "tabnext " . s:current_match_tab
         execute s:current_match_window . "wincmd w"
-        call matchdelete(s:current_match)
+        if exists("w:evanesco_current_match")
+            call matchdelete(w:evanesco_current_match)
+            unlet w:evanesco_current_match
+        endif
         execute save_win . "wincmd w"
         execute "tabnext " . save_tab
     endif
-    silent! unlet s:current_match
     silent! unlet s:current_match_window
     silent! unlet s:current_match_tab
 endfunction
