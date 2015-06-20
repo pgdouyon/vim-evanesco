@@ -25,6 +25,9 @@ function! s:evanesco()
     let s:evanesco = 1
     set nohlsearch
     call s:clear_current_match()
+    if s:pattern_not_found()
+        let v:errmsg = ""
+    endif
     augroup evanesco_hl
         autocmd!
         autocmd CursorMoved,InsertEnter * call <SID>evanesco_toggle_hl()
@@ -78,7 +81,7 @@ function! s:evanesco_toggle_hl()
         let conjunctive_offset = '\m\%([/?][esb]\?[+-]\?[0-9]*\)\?$'
         let normal_search_executed = (this_search =~# '^\V'.last_search.offset)
         let conjunctive_search_executed = (this_search =~# ';[/?]\V'.last_search.conjunctive_offset)
-        if normal_search_executed || conjunctive_search_executed
+        if !s:pattern_not_found() && (normal_search_executed || conjunctive_search_executed)
             set hlsearch
             call s:clear_current_match()
             call s:highlight_current_match()
@@ -89,6 +92,11 @@ function! s:evanesco_toggle_hl()
         autocmd! evanesco_hl
         augroup! evanesco_hl
     endif
+endfunction
+
+
+function! s:pattern_not_found()
+    return (v:errmsg =~# '^E486')
 endfunction
 
 
@@ -112,9 +120,9 @@ function! s:clear_current_match()
         endif
         execute save_win . "wincmd w"
         execute "tabnext " . save_tab
+        unlet s:current_match_window
+        unlet s:current_match_tab
     endif
-    silent! unlet s:current_match_window
-    silent! unlet s:current_match_tab
 endfunction
 
 
