@@ -50,11 +50,13 @@ endfunction
 
 function! s:evanesco_visual_star()
     let save_unnamed = @@
+    let save_yank_register = @0
     let s:save_shortmess = &shortmess
     let s:save_winview = winsaveview()
     set shortmess+=s
     normal! gvy
     let search_term = @@
+    let @0 = save_yank_register
     let @@ = save_unnamed
     return search_term
 endfunction
