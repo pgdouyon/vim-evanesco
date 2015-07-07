@@ -55,7 +55,7 @@ function! s:evanesco_visual_star()
     let s:save_winview = winsaveview()
     set shortmess+=s
     normal! gvy
-    let search_term = @@
+    let search_term = '\V' . escape(@@, '\')
     let @0 = save_yank_register
     let @@ = save_unnamed
     return search_term
