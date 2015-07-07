@@ -49,15 +49,15 @@ endfunction
 
 
 function! s:evanesco_visual_star()
-    let save_unnamed = @@
-    let save_yank_register = @0
+    let save_yank_register_info = ['0', getreg('0'), getregtype('0')]
+    let save_unnamed_register_info = ['"', getreg('"'), getregtype('"')]
     let s:save_shortmess = &shortmess
     let s:save_winview = winsaveview()
     set shortmess+=s
     normal! gvy
     let search_term = '\V' . escape(@@, '\')
-    let @0 = save_yank_register
-    let @@ = save_unnamed
+    call call("setreg", save_yank_register_info)
+    call call("setreg", save_unnamed_register_info)
     return search_term
 endfunction
 
