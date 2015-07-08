@@ -22,16 +22,31 @@ set cpoptions&vim
 let s:evanesco_should_highlight = 0
 
 function! s:evanesco()
-    let s:evanesco_should_highlight = 1
-    set nohlsearch
-    call s:clear_current_match()
     if s:pattern_not_found()
         let v:errmsg = ""
     endif
+    let s:evanesco_should_highlight = 1
+    call s:disable_highlighting()
+    call s:register_autocmds()
+endfunction
+
+
+function! s:pattern_not_found()
+    return (v:errmsg =~# '^E486')
+endfunction
+
+
+function! s:register_autocmds()
     augroup evanesco_hl
         autocmd!
         autocmd CursorMoved,InsertEnter * call <SID>evanesco_toggle_hl()
     augroup END
+endfunction
+
+
+function! s:unregister_autocmds()
+    autocmd! evanesco_hl
+    augroup! evanesco_hl
 endfunction
 
 
@@ -84,25 +99,29 @@ function! s:evanesco_toggle_hl()
         let normal_search_executed = (this_search =~# '^\V'.last_search.offset)
         let conjunctive_search_executed = (this_search =~# ';[/?]\V'.last_search.conjunctive_offset)
         if !s:pattern_not_found() && (normal_search_executed || conjunctive_search_executed)
-            set hlsearch
-            call s:clear_current_match()
-            call s:highlight_current_match()
+            call s:enable_highlighting()
         endif
     else
-        set nohlsearch
-        call s:clear_current_match()
-        autocmd! evanesco_hl
-        augroup! evanesco_hl
+        call s:disable_highlighting()
+        call s:unregister_autocmds()
     endif
 endfunction
 
 
-function! s:pattern_not_found()
-    return (v:errmsg =~# '^E486')
+function! s:enable_highlighting()
+    set hlsearch
+    call s:highlight_current_match()
+endfunction
+
+
+function! s:disable_highlighting()
+    set nohlsearch
+    call s:clear_current_match()
 endfunction
 
 
 function! s:highlight_current_match()
+    call s:clear_current_match()
     let prefix = '\c\%'.line('.').'l\%'.col('.').'c'
     let w:evanesco_current_match = matchadd("IncSearch", prefix.@/, 999)
     let s:current_match_window = winnr()
