@@ -51,8 +51,9 @@ endfunction
 
 
 function! s:evanesco_next_end()
-    call s:evanesco()
-    call s:evanesco_toggle_hl()
+    call s:register_autocmds()
+    call s:enable_highlighting()
+    let s:evanesco_should_highlight = 0
 endfunction
 
 
@@ -82,9 +83,10 @@ function! s:evanesco_star_end()
     let s:save_winview.lnum = line(".")
     let s:save_winview.col = col(".") - 1
     let s:save_winview.coladd = 0
-    call s:evanesco()
-    call s:evanesco_toggle_hl()
     call winrestview(s:save_winview)
+    call s:register_autocmds()
+    call s:enable_highlighting()
+    let s:evanesco_should_highlight = 0
 endfunction
 
 
