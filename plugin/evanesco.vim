@@ -19,10 +19,10 @@ let g:loaded_evanesco = 1
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-let s:evanesco = 0
+let s:evanesco_should_highlight = 0
 
 function! s:evanesco()
-    let s:evanesco = 1
+    let s:evanesco_should_highlight = 1
     set nohlsearch
     call s:clear_current_match()
     if s:pattern_not_found()
@@ -74,8 +74,8 @@ endfunction
 
 
 function! s:evanesco_toggle_hl()
-    if s:evanesco
-        let s:evanesco = 0
+    if s:evanesco_should_highlight
+        let s:evanesco_should_highlight = 0
         let last_search = escape(@/, '\')
         let this_search = s:get_this_search()
         let search_dir = (v:searchforward ? "/" : "?")
@@ -161,7 +161,7 @@ xmap # <Plug>Evanesco_#
 
 augroup evanesco
     autocmd!
-    autocmd CmdWinEnter [/?] let s:evanesco = 0
+    autocmd CmdWinEnter [/?] let s:evanesco_should_highlight = 0
     autocmd CmdWinLeave [/?] call <SID>evanesco()
 augroup END
 
