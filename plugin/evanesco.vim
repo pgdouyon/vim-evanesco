@@ -20,6 +20,7 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 let s:evanesco_should_highlight = 0
+let s:has_current_match = 0
 
 function! s:evanesco()
     if s:pattern_not_found()
@@ -126,26 +127,44 @@ function! s:highlight_current_match()
     call s:clear_current_match()
     let prefix = '\c\%'.line('.').'l\%'.col('.').'c'
     let w:evanesco_current_match = matchadd("IncSearch", prefix.@/, 999)
-    let s:current_match_window = winnr()
-    let s:current_match_tab = tabpagenr()
+    let s:has_current_match = 1
 endfunction
 
 
 function! s:clear_current_match()
-    if exists("s:current_match_window")
-        let save_tab = tabpagenr()
-        let save_win = tabpagewinnr(s:current_match_tab)
-        execute "tabnext " . s:current_match_tab
-        execute s:current_match_window . "wincmd w"
-        if exists("w:evanesco_current_match")
+    if s:has_current_match
+        let [current_match_tabnr, current_match_winnr] = s:find_current_match_window()
+        if (current_match_tabnr > 0) && (current_match_winnr > 0)
+            let save_tab = tabpagenr()
+            let save_win = tabpagewinnr(current_match_tabnr)
+            execute "tabnext" current_match_tabnr
+            execute current_match_winnr "wincmd w"
             call matchdelete(w:evanesco_current_match)
             unlet w:evanesco_current_match
+            execute save_win "wincmd w"
+            execute "tabnext" save_tab
         endif
-        execute save_win . "wincmd w"
-        execute "tabnext " . save_tab
-        unlet s:current_match_window
-        unlet s:current_match_tab
+        let s:has_current_match = 0
     endif
+endfunction
+
+
+function! s:find_current_match_window()
+    for winnr in range(1, winnr("$"))
+        if !empty(getwinvar(winnr, "evanesco_current_match"))
+            return [tabpagenr(), winnr]
+        endif
+    endfor
+
+    for tabnr in range(1, tabpagenr("$"))
+        for winnr in range(1, tabpagewinnr(tabnr, "$"))
+            if !empty(gettabwinvar(tabnr, winnr, "evanesco_current_match"))
+                return [tabnr, winnr]
+            endif
+        endfor
+    endfor
+
+    return [-1, -1]
 endfunction
 
 
