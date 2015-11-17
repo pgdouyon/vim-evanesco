@@ -187,11 +187,13 @@ nnoremap <silent> <Plug>Evanesco_*  :call <SID>evanesco_star()<CR>*N:call <SID>e
 nnoremap <silent> <Plug>Evanesco_#  :call <SID>evanesco_star()<CR>#N:call <SID>evanesco_star_end()<CR>
 nnoremap <silent> <Plug>Evanesco_g* :call <SID>evanesco_star()<CR>g*N:call <SID>evanesco_star_end()<CR>
 nnoremap <silent> <Plug>Evanesco_g# :call <SID>evanesco_star()<CR>g#N:call <SID>evanesco_star_end()<CR>
+nnoremap <silent> <Plug>Evanesco_gd :call <SID>evanesco_star()<CR>gd:call <SID>evanesco_star_end()<CR>
+nnoremap <silent> <Plug>Evanesco_gD :call <SID>evanesco_star()<CR>gD:call <SID>evanesco_star_end()<CR>
 
 xnoremap <silent> <Plug>Evanesco_*  <Esc>/<C-R>=<SID>evanesco_visual_star()<CR><CR>N:call <SID>evanesco_star_end()<CR>
 xnoremap <silent> <Plug>Evanesco_#  <Esc>?<C-R>=<SID>evanesco_visual_star()<CR><CR>N:call <SID>evanesco_star_end()<CR>
 
-for key in ['/', '?', 'n', 'N', '*', '#', 'g*', 'g#']
+for key in ['/', '?', 'n', 'N', '*', '#', 'g*', 'g#', 'gd', 'gD']
     execute printf("nmap %s <Plug>Evanesco_%s", key, key)
 endfor
 xmap * <Plug>Evanesco_*
