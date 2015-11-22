@@ -142,10 +142,11 @@ function! s:linewise_match_at_cursor(search_term, offset)
     let cursor_line = line(".")
     let offset_lines = matchstr(a:offset, '\d\+')
     let offset_lines = !empty(offset_lines) ? str2nr(offset_lines) : 1
+    let nomagic = &magic ? '' : '\M'
     if (a:offset =~ '^-')
-        return '\%#' . repeat('.*\n', offset_lines) . '.*\zs' . a:search_term
+        return '\m\%#' . repeat('.*\n', offset_lines) . '.*\zs' . nomagic . a:search_term
     else
-        return a:search_term . '\ze' . repeat('.*\n', offset_lines) . '\%#'
+        return a:search_term . '\ze\m' . repeat('.*\n', offset_lines) . '\%#'
     endif
 endfunction
 
