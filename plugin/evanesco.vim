@@ -34,10 +34,16 @@ xnoremap <silent> <Plug>Evanesco_*  <Esc>/<C-R>=evanesco#evanesco_visual_star()<
 xnoremap <silent> <Plug>Evanesco_#  <Esc>?<C-R>=evanesco#evanesco_visual_star()<CR><CR>N:call evanesco#evanesco_star_end()<CR>
 
 for key in ['/', '?', 'n', 'N', '*', '#', 'g*', 'g#', 'gd', 'gD']
-    execute printf("nmap %s <Plug>Evanesco_%s", key, key)
+    if !hasmapto(printf("<Plug>Evanesco_%s", key), "n")
+        execute printf("nmap %s <Plug>Evanesco_%s", key, key)
+    endif
 endfor
-xmap * <Plug>Evanesco_*
-xmap # <Plug>Evanesco_#
+if !hasmapto("<Plug>Evanesco_*", "v")
+    xmap * <Plug>Evanesco_*
+endif
+if !hasmapto("<Plug>Evanesco_#", "v")
+    xmap # <Plug>Evanesco_#
+endif
 
 augroup evanesco
     autocmd!
