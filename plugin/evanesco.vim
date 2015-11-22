@@ -21,6 +21,7 @@ set cpoptions&vim
 
 let s:evanesco_should_highlight = 0
 let s:has_current_match = 0
+let s:evanesco_paused = 0
 
 function! s:evanesco()
     if s:pattern_not_found()
@@ -90,6 +91,10 @@ endfunction
 
 
 function! s:evanesco_toggle_hl()
+    if s:evanesco_paused
+        return
+    endif
+
     if s:evanesco_should_highlight
         let s:evanesco_should_highlight = 0
         if !s:pattern_not_found() && s:search_executed()
@@ -242,6 +247,17 @@ function! s:find_current_match_window()
 endfunction
 
 
+function! s:pause()
+    let s:evanesco_paused = 1
+    let s:evanesco_should_highlight = 1
+endfunction
+
+
+function! s:resume()
+    let s:evanesco_paused = 0
+endfunction
+
+
 nnoremap <Plug>Evanesco_/  :<C-U>call <SID>evanesco()<CR>/
 nnoremap <Plug>Evanesco_?  :<C-U>call <SID>evanesco()<CR>?
 
@@ -266,8 +282,8 @@ xmap # <Plug>Evanesco_#
 
 augroup evanesco
     autocmd!
-    autocmd CmdWinEnter [/?] let s:evanesco_should_highlight = 0
-    autocmd CmdWinLeave [/?] call <SID>evanesco()
+    autocmd CmdWinEnter * call <SID>pause()
+    autocmd CmdWinLeave * call <SID>resume()
 augroup END
 
 let &cpoptions = s:save_cpo
