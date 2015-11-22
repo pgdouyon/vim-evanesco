@@ -22,6 +22,24 @@ Features
 - Visual star-search
 
 
+FAQ
+---
+
+Q. Evanesco conflicts with my favorite mapping for \<char\>, what should I do?
+
+A. You have three options:
+
+1. Put the mapping in `~/.vim/after/plugin` and read `:h after-directory`
+
+2. Place this line in your vimrc:
+
+  ```vim
+  autocmd SourceCmd *plugin/evanesco.vim source <afile> | <your_mapping_here>
+  ```
+
+3. Bug me on the issue tracker with a compelling use case
+
+
 Installation
 ------------
 
