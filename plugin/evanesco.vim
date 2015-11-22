@@ -92,19 +92,94 @@ endfunction
 function! s:evanesco_toggle_hl()
     if s:evanesco_should_highlight
         let s:evanesco_should_highlight = 0
-        let last_search = escape(@/, '\')
-        let this_search = s:get_this_search()
-        let search_dir = (v:searchforward ? "/" : "?")
-        let offset = '\m\%('.search_dir.'[esb]\?[+-]\?[0-9]*\)\?$'
-        let conjunctive_offset = '\m\%([/?][esb]\?[+-]\?[0-9]*\)\?$'
-        let normal_search_executed = (this_search =~# '^\V'.last_search.offset)
-        let conjunctive_search_executed = (this_search =~# ';[/?]\V'.last_search.conjunctive_offset)
-        if !s:pattern_not_found() && (normal_search_executed || conjunctive_search_executed)
+        if !s:pattern_not_found() && s:search_executed()
             call s:enable_highlighting()
         endif
     else
         call s:disable_highlighting()
         call s:unregister_autocmds()
+    endif
+endfunction
+
+
+function! s:search_executed()
+    let [search_term, offset] = s:last_search()
+    let match_at_cursor = s:match_at_cursor(search_term, offset)
+    return (search_term ==# @/) && search(match_at_cursor, 'cnw')
+endfunction
+
+
+function! s:last_search()
+    let last_search = histget("search", -1)
+    let search_dir = (v:searchforward ? "/" : "?")
+    let used_last_pattern = (last_search =~# '^'.search_dir)
+    let is_conjunctive = (last_search =~# '\\\@<![/?];[/?]')
+    if used_last_pattern
+        return [@/, last_search[1:]]
+    endif
+
+    if is_conjunctive
+        let search_query = matchstr(last_search, '\%(.*\\\@<![/?];\)\zs.*')
+        let search_dir = search_query[0]
+        let last_search = search_query[1:]
+    endif
+    let offset_regex = '\\\@<!'.search_dir.'[esb]\?[+-]\?[0-9]*'
+    let search_term = matchstr(last_search, '^.\{-\}\ze\%('.offset_regex.'\)\?$')
+    let offset = matchstr(last_search, offset_regex.'$')[1:]
+    return [search_term, offset]
+endfunction
+
+
+function! s:match_at_cursor(search_term, offset)
+    if s:is_linewise_offset(a:offset)
+        return s:linewise_match_at_cursor(a:search_term, a:offset)
+    else
+        return s:characterwise_match_at_cursor(a:search_term, a:offset)
+    endif
+endfunction
+
+
+function! s:is_linewise_offset(offset)
+    return !empty(a:offset) && (a:offset[0] !~# '[esb]')
+endfunction
+
+
+function! s:linewise_match_at_cursor(search_term, offset)
+    let cursor_line = line(".")
+    let offset_lines = matchstr(a:offset, '\d\+')
+    let offset_lines = !empty(offset_lines) ? str2nr(offset_lines) : 1
+    if (a:offset =~ '^-')
+        return '\%#' . repeat('.*\n', offset_lines) . '.*\zs' . a:search_term
+    else
+        return a:search_term . '\ze' . repeat('.*\n', offset_lines) . '\%#'
+    endif
+endfunction
+
+
+function! s:characterwise_match_at_cursor(search_term, offset)
+    let cursor_column = s:offset_cursor_column(a:search_term, a:offset)
+    if cursor_column <= 0
+        let offset = (0 - cursor_column)
+        return '\%#' . repeat('\_.', offset) . '\zs' . a:search_term
+    elseif cursor_column >= strchars(a:search_term)
+        let offset = cursor_column - strchars(a:search_term)
+        return a:search_term . '\ze' . repeat('\_.', offset) . '\%#'
+    endif
+    let start = a:search_term[0 : cursor_column - 1]
+    let end = a:search_term[cursor_column : -1]
+    return start . '\%#' . end
+endfunction
+
+
+function! s:offset_cursor_column(search_term, offset)
+    let default_offset = (a:offset =~ '[-+]') ? 1 : 0
+    let offset_chars = matchstr(a:offset, '\d\+')
+    let offset_chars = !empty(offset_chars) ? str2nr(offset_chars) : default_offset
+    let start_column = (a:offset =~ 'e') ? strchars(a:search_term) - 1 : 0
+    if (a:offset =~ '-')
+        return (start_column - offset_chars)
+    else
+        return (start_column + offset_chars)
     endif
 endfunction
 
@@ -123,8 +198,9 @@ endfunction
 
 function! s:highlight_current_match()
     call s:clear_current_match()
-    let prefix = '\c\%'.line('.').'l\%'.col('.').'c'
-    let w:evanesco_current_match = matchadd("IncSearch", prefix.@/, 999)
+    let [search_term, offset] = s:last_search()
+    let match_at_cursor = s:match_at_cursor(search_term, offset)
+    let w:evanesco_current_match = matchadd("IncSearch", '\c'.match_at_cursor, 999)
     let s:has_current_match = 1
 endfunction
 
@@ -163,17 +239,6 @@ function! s:find_current_match_window()
     endfor
 
     return [-1, -1]
-endfunction
-
-
-function! s:get_this_search()
-    let this_search = histget("search", -1)
-    let search_dir = (v:searchforward ? "/" : "?")
-    let used_last_pattern = (this_search =~# '^'.search_dir)
-    if used_last_pattern
-        let this_search = @/ . this_search
-    endif
-    return this_search
 endfunction
 
 
