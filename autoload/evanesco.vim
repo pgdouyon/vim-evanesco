@@ -125,6 +125,9 @@ endfunction
 
 
 function! s:match_at_cursor(search_term, offset)
+    if empty(a:offset)
+        return '\%#' . a:search_term
+    endif
     if s:is_linewise_offset(a:offset)
         return s:linewise_match_at_cursor(a:search_term, a:offset)
     else
@@ -134,7 +137,7 @@ endfunction
 
 
 function! s:is_linewise_offset(offset)
-    return !empty(a:offset) && (a:offset[0] !~# '[esb]')
+    return a:offset[0] !~# '[esb]'
 endfunction
 
 
