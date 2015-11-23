@@ -106,7 +106,7 @@ endfunction
 function! s:last_search()
     let last_search = histget("search", -1)
     let search_dir = (v:searchforward ? "/" : "?")
-    let used_last_pattern = (last_search =~# '^'.search_dir)
+    let used_last_pattern = (last_search[0] ==# search_dir)
     let is_conjunctive = (last_search =~# '\\\@<![/?];[/?]')
     if used_last_pattern
         return [@/, last_search[1:]]
