@@ -163,8 +163,9 @@ function! s:characterwise_match_at_cursor(search_term, offset)
         let offset = cursor_column - strchars(a:search_term)
         return a:search_term . '\ze' . repeat('\_.', offset) . '\%#'
     endif
-    let start = a:search_term[0 : cursor_column - 1]
-    let end = a:search_term[cursor_column : -1]
+    let byteidx = byteidx(a:search_term, cursor_column)
+    let start = a:search_term[0 : byteidx - 1]
+    let end = a:search_term[byteidx : -1]
     return start . '\%#' . end
 endfunction
 
