@@ -59,11 +59,16 @@ function! evanesco#evanesco_visual_star()
     let save_yank_register_info = ['0', getreg('0'), getregtype('0')]
     let save_unnamed_register_info = ['"', getreg('"'), getregtype('"')]
     normal! gvy
-    let search_term = '\V' . escape(@@, '\')
+    let search_term = '\V' . s:remove_null_bytes(escape(@@, '\'))
     call evanesco#evanesco_star()
     call call("setreg", save_yank_register_info)
     call call("setreg", save_unnamed_register_info)
     return search_term
+endfunction
+
+
+function! s:remove_null_bytes(string)
+    return substitute(a:string, '\%x00', '\\n', 'g')
 endfunction
 
 
