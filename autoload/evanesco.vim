@@ -10,14 +10,14 @@ set cpoptions&vim
 
 let s:paused = 0
 let s:has_current_match = 0
-let s:should_highlight = 0
+let s:try_set_hlsearch = 0
 
 function! evanesco#evanesco()
     if s:pattern_not_found()
         let v:errmsg = ""
     endif
-    let s:should_highlight = 1
-    call s:disable_highlighting()
+    let s:try_set_hlsearch = 1
+    call s:set_nohlsearch()
     call s:register_autocmds()
 endfunction
 
@@ -30,7 +30,7 @@ endfunction
 function! s:register_autocmds()
     augroup evanesco_hl
         autocmd!
-        autocmd CursorMoved,InsertEnter * call <SID>evanesco_toggle_hl()
+        autocmd CursorMoved,InsertEnter * call <SID>toggle_hlsearch()
     augroup END
 endfunction
 
@@ -43,8 +43,8 @@ endfunction
 
 function! evanesco#evanesco_next_end()
     call s:register_autocmds()
-    call s:enable_highlighting()
-    let s:should_highlight = 0
+    call s:set_hlsearch()
+    let s:try_set_hlsearch = 0
 endfunction
 
 
@@ -80,64 +80,72 @@ function! evanesco#evanesco_star_end()
     let s:save_winview.coladd = 0
     call winrestview(s:save_winview)
     call s:register_autocmds()
-    call s:enable_highlighting()
-    let s:should_highlight = 0
+    call s:set_hlsearch()
+    let s:try_set_hlsearch = 0
 endfunction
 
 
-function! s:evanesco_toggle_hl()
+" there are 3 scenarios where the cursor can move after a search is attempted:
+"   1) search was successfully executed and cursor moves to next match
+"   2) search was exectued but failed with a 'pattern not found' error
+"   3) search was aborted by pressing <Esc> or <C-C> at the search prompt
+" only want to enable highlighting for scenario 1 and ignore 2/3 entirely
+function! s:toggle_hlsearch()
     if s:paused
         return
     endif
 
-    if s:should_highlight
-        let s:should_highlight = 0
+    if s:try_set_hlsearch
+        let s:try_set_hlsearch = 0
         if !s:pattern_not_found() && s:search_executed()
-            call s:enable_highlighting()
+            call s:set_hlsearch()
         endif
     else
-        call s:disable_highlighting()
+        call s:set_nohlsearch()
         call s:unregister_autocmds()
     endif
 endfunction
 
 
 function! s:search_executed()
-    let [search_term, offset] = s:last_search()
-    let match_at_cursor = s:match_at_cursor(search_term, offset)
-    return (search_term ==# @/) && search(match_at_cursor, 'cnw')
+    let [search_pattern, offset] = s:last_search_attempt()
+    let match_at_cursor = s:match_at_cursor(search_pattern, offset)
+    return (search_pattern ==# @/) && search(match_at_cursor, 'cnw')
 endfunction
 
 
-function! s:last_search()
-    let last_search = histget("search", -1)
+" extracts pattern and offset from last search attempt
+function! s:last_search_attempt()
+    let last_search_attempt = histget("search", -1)
     let search_dir = (v:searchforward ? "/" : "?")
-    let used_last_pattern = (last_search[0] ==# search_dir)
-    let is_conjunctive = (last_search =~# '\\\@<![/?];[/?]')
-    if used_last_pattern
-        return [@/, last_search[1:]]
+    let reused_latest_pattern = (last_search_attempt[0] ==# search_dir)
+    if reused_latest_pattern
+        return [@/, last_search_attempt[1:]]
     endif
 
-    if is_conjunctive
-        let search_query = matchstr(last_search, '\%(.*\\\@<![/?];\)\zs.*')
+    let is_conjunctive_search = (last_search_attempt =~# '\\\@<![/?];[/?]')
+    if is_conjunctive_search
+        let search_query = matchstr(last_search_attempt, '\%(.*\\\@<![/?];\)\zs.*')
         let search_dir = search_query[0]
-        let last_search = search_query[1:]
+        let last_search_attempt = search_query[1:]
     endif
     let offset_regex = '\\\@<!'.search_dir.'[esb]\?[+-]\?[0-9]*'
-    let search_term = matchstr(last_search, '^.\{-\}\ze\%('.offset_regex.'\)\?$')
-    let offset = matchstr(last_search, offset_regex.'$')[1:]
-    return [search_term, offset]
+    let search_pattern = matchstr(last_search_attempt, '^.\{-\}\ze\%('.offset_regex.'\)\?$')
+    let offset = matchstr(last_search_attempt, offset_regex.'$')[1:]
+    return [search_pattern, offset]
 endfunction
 
 
-function! s:match_at_cursor(search_term, offset)
+" Returns a pattern string to match the search_pattern+offset at the current
+" cursor position
+function! s:match_at_cursor(search_pattern, offset)
     if empty(a:offset)
-        return '\%#' . a:search_term
+        return '\%#' . a:search_pattern
     endif
     if s:is_linewise_offset(a:offset)
-        return s:linewise_match_at_cursor(a:search_term, a:offset)
+        return s:linewise_match_at_cursor(a:search_pattern, a:offset)
     else
-        return s:characterwise_match_at_cursor(a:search_term, a:offset)
+        return s:characterwise_match_at_cursor(a:search_pattern, a:offset)
     endif
 endfunction
 
@@ -147,40 +155,40 @@ function! s:is_linewise_offset(offset)
 endfunction
 
 
-function! s:linewise_match_at_cursor(search_term, offset)
+function! s:linewise_match_at_cursor(search_pattern, offset)
     let cursor_line = line(".")
     let offset_lines = matchstr(a:offset, '\d\+')
     let offset_lines = !empty(offset_lines) ? str2nr(offset_lines) : 1
     let nomagic = &magic ? '' : '\M'
     if (a:offset =~ '^-')
-        return '\m\%#' . repeat('.*\n', offset_lines) . '.*\zs' . nomagic . a:search_term
+        return '\m\%#' . repeat('.*\n', offset_lines) . '.*\zs' . nomagic . a:search_pattern
     else
-        return a:search_term . '\ze\m' . repeat('.*\n', offset_lines) . '\%#'
+        return a:search_pattern . '\ze\m' . repeat('.*\n', offset_lines) . '\%#'
     endif
 endfunction
 
 
-function! s:characterwise_match_at_cursor(search_term, offset)
-    let cursor_column = s:offset_cursor_column(a:search_term, a:offset)
+function! s:characterwise_match_at_cursor(search_pattern, offset)
+    let cursor_column = s:offset_cursor_column(a:search_pattern, a:offset)
     if cursor_column <= 0
         let offset = (0 - cursor_column)
-        return '\%#' . repeat('\_.', offset) . '\zs' . a:search_term
-    elseif cursor_column >= strchars(a:search_term)
-        let offset = cursor_column - strchars(a:search_term)
-        return a:search_term . '\ze' . repeat('\_.', offset) . '\%#'
+        return '\%#' . repeat('\_.', offset) . '\zs' . a:search_pattern
+    elseif cursor_column >= strchars(a:search_pattern)
+        let offset = cursor_column - strchars(a:search_pattern)
+        return a:search_pattern . '\ze' . repeat('\_.', offset) . '\%#'
     endif
-    let byteidx = byteidx(a:search_term, cursor_column)
-    let start = a:search_term[0 : byteidx - 1]
-    let end = a:search_term[byteidx : -1]
+    let byteidx = byteidx(a:search_pattern, cursor_column)
+    let start = a:search_pattern[0 : byteidx - 1]
+    let end = a:search_pattern[byteidx : -1]
     return start . '\%#' . end
 endfunction
 
 
-function! s:offset_cursor_column(search_term, offset)
+function! s:offset_cursor_column(search_pattern, offset)
     let default_offset = (a:offset =~ '[-+]') ? 1 : 0
     let offset_chars = matchstr(a:offset, '\d\+')
     let offset_chars = !empty(offset_chars) ? str2nr(offset_chars) : default_offset
-    let start_column = (a:offset =~ 'e') ? strchars(a:search_term) - 1 : 0
+    let start_column = (a:offset =~ 'e') ? strchars(a:search_pattern) - 1 : 0
     if (a:offset =~ '-')
         return (start_column - offset_chars)
     else
@@ -189,13 +197,13 @@ function! s:offset_cursor_column(search_term, offset)
 endfunction
 
 
-function! s:enable_highlighting()
+function! s:set_hlsearch()
     set hlsearch
     call s:highlight_current_match()
 endfunction
 
 
-function! s:disable_highlighting()
+function! s:set_nohlsearch()
     set nohlsearch
     call s:clear_current_match()
 endfunction
@@ -203,8 +211,8 @@ endfunction
 
 function! s:highlight_current_match()
     call s:clear_current_match()
-    let [search_term, offset] = s:last_search()
-    let match_at_cursor = s:match_at_cursor(search_term, offset)
+    let [search_pattern, offset] = s:last_search_attempt()
+    let match_at_cursor = s:match_at_cursor(search_pattern, offset)
     let w:evanesco_current_match = matchadd("IncSearch", '\c'.match_at_cursor, 999)
     let s:has_current_match = 1
 endfunction
@@ -249,7 +257,7 @@ endfunction
 
 function! evanesco#pause()
     let s:paused = 1
-    let s:should_highlight = 1
+    let s:try_set_hlsearch = 1
 endfunction
 
 
