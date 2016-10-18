@@ -200,6 +200,9 @@ endfunction
 function! s:set_hlsearch()
     set hlsearch
     call s:highlight_current_match()
+    if (&foldopen =~# 'search') || (&foldopen =~# 'all')
+        normal! zv
+    endif
 endfunction
 
 
