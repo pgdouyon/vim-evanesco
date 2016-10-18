@@ -140,7 +140,7 @@ endfunction
 " cursor position
 function! s:match_at_cursor(search_pattern, offset)
     if empty(a:offset)
-        return '\%#' . a:search_pattern
+        return '\%#\%(' . a:search_pattern . '\)'
     endif
     if s:is_linewise_offset(a:offset)
         return s:linewise_match_at_cursor(a:search_pattern, a:offset)
@@ -180,7 +180,7 @@ function! s:characterwise_match_at_cursor(search_pattern, offset)
     let byteidx = byteidx(a:search_pattern, cursor_column)
     let start = a:search_pattern[0 : byteidx - 1]
     let end = a:search_pattern[byteidx : -1]
-    return start . '\%#' . end
+    return start . '\%#\%(' . end . '\)'
 endfunction
 
 
