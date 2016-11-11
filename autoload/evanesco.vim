@@ -139,14 +139,21 @@ endfunction
 " Returns a pattern string to match the search_pattern+offset at the current
 " cursor position
 function! s:match_at_cursor(search_pattern, offset)
+    let search_pattern = s:sanitize_search_pattern(a:search_pattern)
     if empty(a:offset)
-        return '\%#\%(' . a:search_pattern . '\)'
+        return '\%#\%(' . search_pattern . '\)'
     endif
     if s:is_linewise_offset(a:offset)
-        return s:linewise_match_at_cursor(a:search_pattern, a:offset)
+        return s:linewise_match_at_cursor(search_pattern, a:offset)
     else
-        return s:characterwise_match_at_cursor(a:search_pattern, a:offset)
+        return s:characterwise_match_at_cursor(search_pattern, a:offset)
     endif
+endfunction
+
+
+function! s:sanitize_search_pattern(search_pattern)
+    let replacement = &magic ? '\\*' : '*'
+    return substitute(a:search_pattern, '\V\^*', replacement, '')
 endfunction
 
 
