@@ -23,10 +23,10 @@ nnoremap <Plug>Evanesco_? :<C-U>call evanesco#evanesco()<CR>?
 nnoremap <silent> <Plug>Evanesco_n  :echo<CR>n:call evanesco#evanesco_next_end()<CR>
 nnoremap <silent> <Plug>Evanesco_N  :echo<CR>N:call evanesco#evanesco_next_end()<CR>
 
-nnoremap <silent> <Plug>Evanesco_*  :call evanesco#evanesco_star()<CR>*<C-O>:call evanesco#evanesco_star_end()<CR>
-nnoremap <silent> <Plug>Evanesco_#  :call evanesco#evanesco_star()<CR>#<C-O>:call evanesco#evanesco_star_end()<CR>
-nnoremap <silent> <Plug>Evanesco_g* :call evanesco#evanesco_star()<CR>g*<C-O>:call evanesco#evanesco_star_end()<CR>
-nnoremap <silent> <Plug>Evanesco_g# :call evanesco#evanesco_star()<CR>g#<C-O>:call evanesco#evanesco_star_end()<CR>
+nnoremap <silent> <Plug>Evanesco_*  :call evanesco#evanesco_star()<CR>:keepjumps normal! *N<CR>:call evanesco#evanesco_star_end()<CR>
+nnoremap <silent> <Plug>Evanesco_#  :call evanesco#evanesco_star()<CR>:keepjumps normal! #N<CR>:call evanesco#evanesco_star_end()<CR>
+nnoremap <silent> <Plug>Evanesco_g* :call evanesco#evanesco_star()<CR>:keepjumps normal! g*N<CR>:call evanesco#evanesco_star_end()<CR>
+nnoremap <silent> <Plug>Evanesco_g# :call evanesco#evanesco_star()<CR>:keepjumps normal! g#N<CR>:call evanesco#evanesco_star_end()<CR>
 nnoremap <silent> <Plug>Evanesco_gd :call evanesco#evanesco_star()<CR>gd:call evanesco#evanesco_star_end()<CR>
 nnoremap <silent> <Plug>Evanesco_gD :call evanesco#evanesco_star()<CR>gD:call evanesco#evanesco_star_end()<CR>
 
