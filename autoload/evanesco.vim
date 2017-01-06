@@ -141,7 +141,7 @@ endfunction
 function! s:match_at_cursor(search_pattern, offset)
     let search_pattern = s:sanitize_search_pattern(a:search_pattern)
     if empty(a:offset)
-        return '\%#\%(' . search_pattern . '\)'
+        return '\%#' . search_pattern
     endif
     if s:is_linewise_offset(a:offset)
         return s:linewise_match_at_cursor(search_pattern, a:offset)
@@ -152,8 +152,10 @@ endfunction
 
 
 function! s:sanitize_search_pattern(search_pattern)
-    let replacement = &magic ? '\\*' : '*'
-    return substitute(a:search_pattern, '\V\^*', replacement, '')
+    let star_replacement = &magic ? '\\*' : '*'
+    let equals_replacement = '\%(=\)'
+    let sanitized = substitute(a:search_pattern, '\V\^*', star_replacement, '')
+    return substitute(sanitized, '\V\^=', equals_replacement, '')
 endfunction
 
 
@@ -187,7 +189,7 @@ function! s:characterwise_match_at_cursor(search_pattern, offset)
     let byteidx = byteidx(a:search_pattern, cursor_column)
     let start = a:search_pattern[0 : byteidx - 1]
     let end = a:search_pattern[byteidx : -1]
-    return start . '\%#\%(' . end . '\)'
+    return start . '\%#' . s:sanitize_search_pattern(end)
 endfunction
 
 
