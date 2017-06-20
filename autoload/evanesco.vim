@@ -238,8 +238,14 @@ function! s:clear_current_match()
             let save_win = tabpagewinnr(current_match_tabnr)
             execute "tabnext" current_match_tabnr
             execute current_match_winnr "wincmd w"
-            call matchdelete(w:evanesco_current_match)
+
+            try
+                call matchdelete(w:evanesco_current_match)
+            catch /E803/
+                " suppress errors for matches that have already been deleted
+            endtry
             unlet w:evanesco_current_match
+
             execute save_win "wincmd w"
             execute "tabnext" save_tab
         endif
