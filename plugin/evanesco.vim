@@ -16,6 +16,7 @@ let g:loaded_evanesco = 1
 
 let s:save_cpo = &cpoptions
 set cpoptions&vim
+set nohlsearch
 
 nnoremap <Plug>Evanesco_/ :<C-U>call evanesco#evanesco()<CR>/
 nnoremap <Plug>Evanesco_? :<C-U>call evanesco#evanesco()<CR>?
