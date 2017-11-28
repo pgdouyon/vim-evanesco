@@ -141,9 +141,8 @@ endfunction
 function! s:match_at_cursor(search_pattern, offset)
     let search_pattern = s:sanitize_search_pattern(a:search_pattern)
     if empty(a:offset)
-        return '\%#' . search_pattern
-    endif
-    if s:is_linewise_offset(a:offset)
+        return s:simple_match_at_cursor(search_pattern)
+    elseif s:is_linewise_offset(a:offset)
         return s:linewise_match_at_cursor(search_pattern, a:offset)
     else
         return s:characterwise_match_at_cursor(search_pattern, a:offset)
@@ -159,6 +158,28 @@ function! s:sanitize_search_pattern(search_pattern)
 endfunction
 
 
+function! s:simple_match_at_cursor(search_pattern)
+    return a:search_pattern =~# '\\zs'
+                \ ? s:normalize_zs_pattern(a:search_pattern)
+                \ : '\%#' . a:search_pattern
+endfunction
+
+
+function! s:normalize_zs_pattern(search_pattern)
+    let [head, tail] = split(a:search_pattern, '\\zs')
+    return '\m\%('.head.'\m\)\@<=\%#'.s:extract_magic(head).tail
+endfunction
+
+
+function! s:extract_magic(search_pattern)
+    let default_magic = &magic ? '\m' : '\M'
+    let sanitized_search_pattern = substitute(a:search_pattern, '\\\\', '', 'g')
+    let last_magic_pattern_regex = '\%(\\[mvMV]\)\ze\%([^\\]\|\\[^mMvV]\)*$'
+    let last_magic_pattern = matchstr(sanitized_search_pattern, last_magic_pattern_regex)
+    return !empty(last_magic_pattern) ? last_magic_pattern : default_magic
+endfunction
+
+
 function! s:is_linewise_offset(offset)
     return a:offset[0] !~# '[esb]'
 endfunction
@@ -170,21 +191,23 @@ function! s:linewise_match_at_cursor(search_pattern, offset)
     let offset_lines = !empty(offset_lines) ? str2nr(offset_lines) : 1
     let nomagic = &magic ? '' : '\M'
     if (a:offset =~ '^-')
-        return '\m\%#' . repeat('.*\n', offset_lines) . '.*\zs' . nomagic . a:search_pattern
+        return '\m\%(\%#' . repeat('.*\n', offset_lines) . '.*\)\@<=' . nomagic . a:search_pattern
     else
-        return a:search_pattern . '\ze\m' . repeat('.*\n', offset_lines) . '\%#'
+        return a:search_pattern . '\m\%(' . repeat('.*\n', offset_lines) . '\%#\)\@='
     endif
 endfunction
 
 
 function! s:characterwise_match_at_cursor(search_pattern, offset)
     let cursor_column = s:offset_cursor_column(a:search_pattern, a:offset)
-    if cursor_column <= 0
+    if cursor_column == 0
+        return s:simple_match_at_cursor(a:search_pattern)
+    elseif cursor_column < 0
         let offset = (0 - cursor_column)
-        return '\%#' . repeat('\_.', offset) . '\zs' . a:search_pattern
+        return '\%(\%#' . repeat('\_.', offset) . '\)\@<=' . a:search_pattern
     elseif cursor_column >= strchars(a:search_pattern)
         let offset = cursor_column - strchars(a:search_pattern)
-        return a:search_pattern . '\ze' . repeat('\_.', offset) . '\%#'
+        return a:search_pattern . '\m\%(' . repeat('\_.', offset) . '\%#\)\@='
     endif
     let byteidx = byteidx(a:search_pattern, cursor_column)
     let start = a:search_pattern[0 : byteidx - 1]
@@ -198,11 +221,7 @@ function! s:offset_cursor_column(search_pattern, offset)
     let offset_chars = matchstr(a:offset, '\d\+')
     let offset_chars = !empty(offset_chars) ? str2nr(offset_chars) : default_offset
     let start_column = (a:offset =~ 'e') ? strchars(a:search_pattern) - 1 : 0
-    if (a:offset =~ '-')
-        return (start_column - offset_chars)
-    else
-        return (start_column + offset_chars)
-    endif
+    return a:offset =~ '-' ? (start_column - offset_chars) : (start_column + offset_chars)
 endfunction
 
 
