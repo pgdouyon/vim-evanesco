@@ -62,9 +62,11 @@ function! evanesco#evanesco_visual_star(search_type)
     let escape_chars = '\' . a:search_type
     let search_term = '\V' . s:remove_null_bytes(escape(@@, escape_chars))
     call evanesco#evanesco_star()
-    call call("setreg", save_yank_register_info)
     call call("setreg", save_unnamed_register_info)
-    return search_term
+    call call("setreg", save_yank_register_info)
+
+    call feedkeys(a:search_type . search_term . "\<CR>\<C-O>", "nt")
+    call feedkeys(":call evanesco#evanesco_star_end()\<CR>", "nt")
 endfunction
 
 

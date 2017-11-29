@@ -31,8 +31,8 @@ nnoremap <silent> <Plug>Evanesco_g# :call evanesco#evanesco_star()<CR>:keepjumps
 nnoremap <silent> <Plug>Evanesco_gd :call evanesco#evanesco_star()<CR>gd:call evanesco#evanesco_star_end()<CR>
 nnoremap <silent> <Plug>Evanesco_gD :call evanesco#evanesco_star()<CR>gD:call evanesco#evanesco_star_end()<CR>
 
-xnoremap <silent> <Plug>Evanesco_*  <Esc>/<C-R>=evanesco#evanesco_visual_star('/')<CR><CR><C-O>:call evanesco#evanesco_star_end()<CR>
-xnoremap <silent> <Plug>Evanesco_#  <Esc>?<C-R>=evanesco#evanesco_visual_star('?')<CR><CR><C-O>:call evanesco#evanesco_star_end()<CR>
+xnoremap <silent> <Plug>Evanesco_*  <Esc>:<C-U>call evanesco#evanesco_visual_star('/')<CR>
+xnoremap <silent> <Plug>Evanesco_#  <Esc>:<C-U>call evanesco#evanesco_visual_star('?')<CR>
 
 for key in ['/', '?', 'n', 'N', '*', '#', 'g*', 'g#', 'gd', 'gD']
     if !hasmapto(printf("<Plug>Evanesco_%s", key), "n")
