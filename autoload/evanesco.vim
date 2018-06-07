@@ -174,11 +174,15 @@ endfunction
 
 
 function! s:extract_magic(search_pattern)
-    let default_magic = &magic ? '\m' : '\M'
     let sanitized_search_pattern = substitute(a:search_pattern, '\\\\', '', 'g')
     let last_magic_pattern_regex = '\%(\\[mvMV]\)\ze\%([^\\]\|\\[^mMvV]\)*$'
     let last_magic_pattern = matchstr(sanitized_search_pattern, last_magic_pattern_regex)
-    return !empty(last_magic_pattern) ? last_magic_pattern : default_magic
+    return !empty(last_magic_pattern) ? last_magic_pattern : s:magic()
+endfunction
+
+
+function! s:magic()
+    return &magic ? '\m' : '\M'
 endfunction
 
 
@@ -191,9 +195,8 @@ function! s:linewise_match_at_cursor(search_pattern, offset)
     let cursor_line = line(".")
     let offset_lines = matchstr(a:offset, '\d\+')
     let offset_lines = !empty(offset_lines) ? str2nr(offset_lines) : 1
-    let nomagic = &magic ? '' : '\M'
     if (a:offset =~ '^-')
-        return '\m\%(\%#' . repeat('.*\n', offset_lines) . '.*\)\@<=' . nomagic . a:search_pattern
+        return '\m\%(\%#' . repeat('.*\n', offset_lines) . '.*\)\@<=' . s:magic() . a:search_pattern
     else
         return a:search_pattern . '\m\%(' . repeat('.*\n', offset_lines) . '\%#\)\@='
     endif
@@ -242,11 +245,11 @@ function! s:set_nohlsearch()
 endfunction
 
 
-function! s:highlight_current_match()
+function! s:highlight_current_match() abort
     call s:clear_current_match()
     let [search_pattern, offset] = s:last_search_attempt()
     let match_at_cursor = s:match_at_cursor(search_pattern, offset)
-    let w:evanesco_current_match = matchadd("IncSearch", '\c'.match_at_cursor, 999)
+    let w:evanesco_current_match = matchadd("IncSearch", s:magic().'\c'.match_at_cursor, 999)
     let s:has_current_match = 1
 endfunction
 
