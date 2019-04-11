@@ -36,14 +36,14 @@ xnoremap <silent> <Plug>Evanesco_#  <Esc>:<C-U>call evanesco#evanesco_visual_sta
 
 for key in ['/', '?', 'n', 'N', '*', '#', 'g*', 'g#', 'gd', 'gD']
     if !hasmapto(printf("<Plug>Evanesco_%s", key), "n")
-        execute printf("nmap %s <Plug>Evanesco_%s", key, key)
+        execute printf("nmap <expr> expand('%') ==# '[Command Line]' ? '%s' : '<Plug>Evanesco_%s'", key, key)
     endif
 endfor
 if !hasmapto("<Plug>Evanesco_*", "v")
-    xmap * <Plug>Evanesco_*
+    xmap <expr> * expand('%') ==# '[Command Line]' ? '*' : '<Plug>Evanesco_*'
 endif
 if !hasmapto("<Plug>Evanesco_#", "v")
-    xmap # <Plug>Evanesco_#
+    xmap <expr> # expand('%') ==# '[Command Line]' ? '#' : '<Plug>Evanesco_#'
 endif
 
 augroup evanesco
