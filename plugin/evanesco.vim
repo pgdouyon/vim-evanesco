@@ -46,11 +46,5 @@ if !hasmapto("<Plug>Evanesco_#", "v")
     xmap # <Plug>Evanesco_#
 endif
 
-augroup evanesco
-    autocmd!
-    autocmd CmdWinEnter * call evanesco#pause()
-    autocmd CmdWinLeave * call evanesco#resume()
-augroup END
-
 let &cpoptions = s:save_cpo
 unlet s:save_cpo

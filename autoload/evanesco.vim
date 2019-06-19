@@ -263,15 +263,15 @@ function! s:clear_current_match()
             execute "tabnext" current_match_tabnr
             execute current_match_winnr "wincmd w"
 
-            try
-                call matchdelete(w:evanesco_current_match)
-            catch /E803/
-                " suppress errors for matches that have already been deleted
-            endtry
+            call s:matchdelete(w:evanesco_current_match)
             unlet w:evanesco_current_match
 
             execute save_win "wincmd w"
             execute "tabnext" save_tab
+        elseif exists("w:evanesco_current_match")
+            " ensure current match is cleared in special cases like command line window
+            call s:matchdelete(w:evanesco_current_match)
+            unlet w:evanesco_current_match
         endif
         let s:has_current_match = 0
     endif
@@ -279,6 +279,10 @@ endfunction
 
 
 function! s:find_current_match_window()
+    if !empty(getcmdwintype())
+        return [-1, -1]
+    endif
+
     for winnr in range(1, winnr("$"))
         if !empty(getwinvar(winnr, "evanesco_current_match"))
             return [tabpagenr(), winnr]
@@ -297,6 +301,16 @@ function! s:find_current_match_window()
 endfunction
 
 
+function! s:matchdelete(match_id)
+    try
+        call matchdelete(a:match_id)
+    catch /E803/
+        " suppress errors for matches that have already been deleted
+    endtry
+endfunction
+
+
+" currently unused
 function! evanesco#pause()
     let s:paused = 1
     let s:try_set_hlsearch = 1
