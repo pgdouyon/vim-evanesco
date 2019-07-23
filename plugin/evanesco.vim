@@ -18,8 +18,8 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 set nohlsearch
 
-nnoremap <Plug>Evanesco_/ :<C-U>call evanesco#evanesco()<CR>/
-nnoremap <Plug>Evanesco_? :<C-U>call evanesco#evanesco()<CR>?
+nnoremap <silent> <Plug>Evanesco_/ :<C-U>call evanesco#evanesco('/')<CR>
+nnoremap <silent> <Plug>Evanesco_? :<C-U>call evanesco#evanesco('?')<CR>
 
 nnoremap <silent> <Plug>Evanesco_n  :echo<CR>n:call evanesco#evanesco_next_end()<CR>
 nnoremap <silent> <Plug>Evanesco_N  :echo<CR>N:call evanesco#evanesco_next_end()<CR>

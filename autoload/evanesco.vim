@@ -12,13 +12,14 @@ let s:paused = 0
 let s:has_current_match = 0
 let s:try_set_hlsearch = 0
 
-function! evanesco#evanesco()
+function! evanesco#evanesco(search_command)
     if s:pattern_not_found()
         let v:errmsg = ""
     endif
     let s:try_set_hlsearch = 1
     call s:set_nohlsearch()
     call s:register_autocmds()
+    call feedkeys(a:search_command, 'nt')
 endfunction
 
 
