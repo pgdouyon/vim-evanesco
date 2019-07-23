@@ -66,7 +66,7 @@ function! evanesco#evanesco_visual_star(search_type)
     call call("setreg", save_yank_register_info)
 
     call feedkeys(a:search_type . search_term . "\<CR>\<C-O>", "nt")
-    call feedkeys(":call evanesco#evanesco_star_end()\<CR>", "nt")
+    call feedkeys("\<Plug>Evanesco_visual_search_end", "m")
 endfunction
 
 

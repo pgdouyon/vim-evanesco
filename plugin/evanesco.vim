@@ -34,6 +34,10 @@ nnoremap <silent> <Plug>Evanesco_gD :call evanesco#evanesco_star()<CR>gD:call ev
 xnoremap <silent> <Plug>Evanesco_*  <Esc>:<C-U>call evanesco#evanesco_visual_star('/')<CR>
 xnoremap <silent> <Plug>Evanesco_#  <Esc>:<C-U>call evanesco#evanesco_visual_star('?')<CR>
 
+" hack used to call evanesco#evanesco_star_end from feedkeys without causing
+" command to echo or be saved in command history
+nnoremap <silent> <Plug>Evanesco_visual_search_end :<C-U>call evanesco#evanesco_star_end()<CR>:echo<CR>
+
 for key in ['/', '?', 'n', 'N', '*', '#', 'g*', 'g#', 'gd', 'gD']
     if !hasmapto(printf("<Plug>Evanesco_%s", key), "n")
         execute printf("nmap %s <Plug>Evanesco_%s", key, key)
