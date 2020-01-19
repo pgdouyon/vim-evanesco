@@ -19,7 +19,7 @@ function! evanesco#evanesco(search_command)
     let s:try_set_hlsearch = 1
     call s:set_nohlsearch()
     call s:register_autocmds()
-    call feedkeys(a:search_command, 'nt')
+    call feedkeys(a:search_command, 'nti')
 endfunction
 
 
@@ -66,8 +66,10 @@ function! evanesco#evanesco_visual_star(search_type)
     call call("setreg", save_unnamed_register_info)
     call call("setreg", save_yank_register_info)
 
-    call feedkeys(a:search_type . search_term . "\<CR>\<C-O>", "nt")
-    call feedkeys("\<Plug>Evanesco_visual_search_end", "m")
+    " since each call inserts at the start of the buffer, the characters from
+    " the first call will be processed after those from the second
+    call feedkeys("\<Plug>Evanesco_visual_search_end", "mi")
+    call feedkeys(a:search_type . search_term . "\<CR>\<C-O>", "nti")
 endfunction
 
 
