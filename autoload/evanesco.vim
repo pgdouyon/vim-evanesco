@@ -69,7 +69,7 @@ function! evanesco#evanesco_visual_star(search_type)
     " since each call inserts at the start of the buffer, the characters from
     " the first call will be processed after those from the second
     call feedkeys("\<Plug>Evanesco_visual_search_end", "mi")
-    call feedkeys(a:search_type . search_term . "\<CR>\<C-O>", "nti")
+    call feedkeys(a:search_type . search_term . "\<CR>N", "nti")
 endfunction
 
 
