@@ -37,8 +37,15 @@ endfunction
 
 
 function! s:unregister_autocmds()
-    autocmd! evanesco_hl
-    augroup! evanesco_hl
+    if exists("#evanesco_hl")
+        autocmd! evanesco_hl
+        augroup! evanesco_hl
+    endif
+endfunction
+
+
+function! evanesco#evanesco_next_init()
+    call s:unregister_autocmds()
 endfunction
 
 
@@ -49,7 +56,8 @@ function! evanesco#evanesco_next_end()
 endfunction
 
 
-function! evanesco#evanesco_star()
+function! evanesco#evanesco_star_init()
+    call s:unregister_autocmds()
     let s:save_shortmess = &shortmess
     let s:save_winview = winsaveview()
     set shortmess+=s
@@ -62,7 +70,7 @@ function! evanesco#evanesco_visual_star(search_type)
     normal! gvy
     let escape_chars = '\' . a:search_type
     let search_term = '\V' . s:remove_null_bytes(escape(@@, escape_chars))
-    call evanesco#evanesco_star()
+    call evanesco#evanesco_star_init()
     call call("setreg", save_unnamed_register_info)
     call call("setreg", save_yank_register_info)
 
